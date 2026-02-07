@@ -16,3 +16,220 @@
 .step-transition {
   animation: stepFadeIn 0.3s ease-out forwards;
 }
+
+/* Multi-branch flower bloom animation (~8s total) */
+
+@keyframes bloomSeedAppear {
+  from {
+    opacity: 0;
+    transform: scale(0.2);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes bloomStemGrow {
+  from {
+    opacity: 0;
+    transform: scaleY(0);
+  }
+  to {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+}
+
+@keyframes bloomPathDraw {
+  from {
+    stroke-dashoffset: 1;
+    opacity: 0;
+  }
+  to {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+}
+
+@keyframes bloomLeafGrow {
+  from {
+    opacity: 0;
+    transform: scaleX(0);
+  }
+  to {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+}
+
+/* Bud: appear → enlarge + fade */
+@keyframes bloomBudSequence {
+  0% {
+    opacity: 0;
+    transform: scale(0);
+  }
+  40% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.2);
+  }
+}
+
+/* Flower group: hidden until bud fades, then show */
+@keyframes bloomFlowerReveal {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Flower center: appear */
+@keyframes bloomFlowerCenterAppear {
+  from {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  to {
+    opacity: 0.95;
+    transform: scale(1);
+  }
+}
+
+/* Petal: grow from center outward */
+@keyframes bloomPetalGrow {
+  from {
+    opacity: 0;
+    transform: scale(0);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes bloomCompositionGrow {
+  0%,
+  75% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(1.05);
+  }
+}
+
+/* Seed */
+.bloom-seed {
+  transform-origin: 160px 225px;
+  animation: bloomSeedAppear 1.2s ease-in-out forwards;
+}
+
+/* Main stem */
+.bloom-main-stem {
+  transform-origin: 160px 219px;
+  animation: bloomStemGrow 1.2s ease-in-out 0.3s forwards;
+  opacity: 0;
+}
+
+/* Branches */
+.bloom-branch {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: bloomPathDraw 0.8s ease-in-out forwards;
+  opacity: 0;
+}
+
+/* Leaves */
+.bloom-leaf {
+  transform-origin: 0 0;
+  animation: bloomLeafGrow 0.6s ease-out forwards;
+  opacity: 0;
+}
+
+/* Bud: appear → enlarge + fade (total ~0.6s) */
+.bloom-bud {
+  opacity: 0;
+  transform-origin: 0 0;
+  animation: bloomBudSequence 0.6s ease-in-out forwards;
+}
+
+/* Flower group: fade in as bud fades */
+.bloom-flower {
+  opacity: 0;
+  animation: bloomFlowerReveal 0.1s ease-out forwards;
+}
+
+/* Flower center */
+.bloom-flower-center {
+  opacity: 0;
+  transform-origin: 0 0;
+  animation: bloomFlowerCenterAppear 0.4s ease-out forwards;
+}
+
+/* Petals: grow outward, then 휘날리는 느낌 */
+@keyframes bloomPetalFlutter {
+  0%, 100% { transform: scale(1) rotate(0deg); }
+  25% { transform: scale(1.02) rotate(1.5deg); }
+  75% { transform: scale(1.02) rotate(-1.5deg); }
+}
+
+/* 성장 스토리: 단계별 등장 */
+@keyframes flowerSeedAppear {
+  from { opacity: 0; transform: scale(0.2); }
+  to { opacity: 1; transform: scale(1); }
+}
+@keyframes flowerPathDraw {
+  from { stroke-dashoffset: 1; opacity: 0; }
+  to { stroke-dashoffset: 0; opacity: 1; }
+}
+@keyframes flowerCenterAppear {
+  from { opacity: 0; transform: scale(0.3); }
+  to { opacity: 0.95; transform: scale(1); }
+}
+@keyframes flowerPetalGrow {
+  from { opacity: 0; transform: scale(0); }
+  to { opacity: 1; transform: scale(1); }
+}
+@keyframes flowerMessageAppear {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.bloom-flower-petal {
+  opacity: 0;
+  transform-origin: 0 0;
+  animation:
+    bloomPetalGrow 0.5s ease-out forwards,
+    bloomPetalFlutter 4s ease-in-out 2s infinite;
+}
+
+/* Final: pause, gently scale up 5%, hold */
+.flower-composition {
+  transform-origin: 160px 225px;
+  animation: bloomCompositionGrow 2.4s ease-out 6.5s both;
+}
+
+/* 배경 휘날리는 꽃잎 */
+@keyframes floatPetal {
+  0%, 100% {
+    transform: translate(0, 0) rotate(0deg);
+    opacity: 0.35;
+  }
+  25% {
+    transform: translate(8px, -12px) rotate(8deg);
+    opacity: 0.5;
+  }
+  50% {
+    transform: translate(-5px, -20px) rotate(-5deg);
+    opacity: 0.4;
+  }
+  75% {
+    transform: translate(12px, -8px) rotate(12deg);
+    opacity: 0.45;
+  }
+}

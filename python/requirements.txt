@@ -1,0 +1,2 @@
+# flower_generator uses only Python stdlib (json, math, dataclasses)
+# No external dependencies required for basic usage.
