@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { BloomColor } from "@/components/bloom/Step1Color";
 import type { BloomFeeling } from "@/lib/bloom-types";
-import { setBloom } from "@/lib/bloom-store";
+import { createBloom } from "@/lib/bloom-db";
 
 const COLOR_MAP: Record<BloomColor, string> = {
   pink: "#F8B4C4",
@@ -33,17 +33,24 @@ export function Step3Feeling({ seedId, colors, message }: Props) {
   const router = useRouter();
   const [selected, setSelected] = useState<BloomFeeling | null>(null);
   const [fading, setFading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSelect = (feeling: BloomFeeling) => {
+  const handleSelect = async (feeling: BloomFeeling) => {
     if (selected) return;
     setSelected(feeling);
-    setBloom(seedId, { colors, message, feeling });
-    setTimeout(() => {
-      setFading(true);
+    setError(null);
+    try {
+      await createBloom(seedId, { colors, message, feeling });
       setTimeout(() => {
-        router.push(`/result/${seedId}`);
-      }, 400);
-    }, 1000);
+        setFading(true);
+        setTimeout(() => {
+          router.push(`/result/${seedId}`);
+        }, 400);
+      }, 1000);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "저장에 실패했어요. 다시 시도해 주세요.");
+      setSelected(null);
+    }
   };
 
   return (
@@ -94,6 +101,9 @@ export function Step3Feeling({ seedId, colors, message }: Props) {
           </button>
         ))}
       </div>
+      {error && (
+        <p className="text-center text-sm text-red-500">{error}</p>
+      )}
     </div>
   );
 }
