@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getSeed } from "@/lib/seed-store";
-import { getBloom } from "@/lib/bloom-store";
+import Link from "next/link";
+import { getSeed } from "@/lib/seed-db";
+import { getBloom } from "@/lib/bloom-db";
 import {
   seedBloomToFlowerParams,
   DEFAULT_FLOWER_PARAMS,
@@ -410,13 +411,25 @@ export function FlowerBloom({ seedId, messageText }: Props) {
   const [showMessage, setShowMessage] = useState(false);
   const [pythonData, setPythonData] = useState<FlowerData | null>(null);
   const [usePython, setUsePython] = useState(true);
+  const [seed, setSeed] = useState<Awaited<ReturnType<typeof getSeed>>>(null);
+  const [bloom, setBloom] = useState<Awaited<ReturnType<typeof getBloom>>>(null);
+  const [loadState, setLoadState] = useState<"loading" | "ready" | "no_seed" | "no_bloom">("loading");
 
-  const seed = getSeed(seedId);
-  const bloom = getBloom(seedId);
   const finalMessage = messageText ?? (bloom?.message || "이 꽃은 두 사람의 마음으로 피어났어요.");
 
   const params =
     seed && bloom ? seedBloomToFlowerParams(seed, bloom) : DEFAULT_FLOWER_PARAMS;
+
+  useEffect(() => {
+    (async () => {
+      const [s, b] = await Promise.all([getSeed(seedId), getBloom(seedId)]);
+      setSeed(s);
+      setBloom(b);
+      if (!s) setLoadState("no_seed");
+      else if (!b) setLoadState("no_bloom");
+      else setLoadState("ready");
+    })();
+  }, [seedId]);
 
   useEffect(() => {
     if (!seed || !bloom || !usePython) return;
@@ -458,6 +471,39 @@ export function FlowerBloom({ seedId, messageText }: Props) {
   const petalColors = resolvedColors.length
     ? resolvedColors.map((c) => BLOOM_COLOR_HEX[c]).filter(Boolean)
     : [params.flowerColor ?? "#F8B4C4"];
+
+  if (loadState === "loading") {
+    return (
+      <main className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden bg-[#fefaf8]">
+        <p className="text-sm text-gray-400">불러오는 중...</p>
+      </main>
+    );
+  }
+
+  if (loadState === "no_seed") {
+    return (
+      <main className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden bg-[#fefaf8]">
+        <p className="text-gray-600">잘못된 링크예요.</p>
+        <Link href="/" className="mt-4 text-sm text-pink-600 hover:underline">
+          처음으로
+        </Link>
+      </main>
+    );
+  }
+
+  if (loadState === "no_bloom") {
+    return (
+      <main className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden bg-[#fefaf8]">
+        <p className="text-gray-600">이 꽃은 아직 피지 않았어요.</p>
+        <Link
+          href={`/bloom/${seedId}`}
+          className="mt-4 text-sm text-pink-600 hover:underline"
+        >
+          꽃 완성하러 가기
+        </Link>
+      </main>
+    );
+  }
 
   return (
     <main

@@ -41,7 +41,7 @@ blooming/
 │   ├── seed/               # Step1DayType, Step2Message, Step3Mood, SeedShareLink
 │   ├── bloom/              # Step1Color, Step2Message, Step3Feeling
 │   └── result/             # FlowerBloom, FlowerGrowthView
-├── lib/                    # seed-store, bloom-store, flower-api, flower-params
+├── lib/                    # seed-db, bloom-db, flower-api, flower-params, supabase
 ├── python/
 │   └── flower_generator.py # seed 기반 결정적 꽃 생성 엔진
 └── docs/                   # FLOWER_GROWTH_STORY, FLOWER_PIPELINE

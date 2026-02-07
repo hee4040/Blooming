@@ -7,14 +7,7 @@ import { Step2Message } from "@/components/seed/steps/Step2Message";
 import { Step3Mood, type Mood } from "@/components/seed/steps/Step3Mood";
 import { SeedCompleted } from "@/components/seed/SeedCompleted";
 import { SeedShareLink } from "@/components/seed/SeedShareLink";
-import { setSeed } from "@/lib/seed-store";
-
-function generateSeedId(): string {
-  if (typeof crypto !== "undefined" && crypto.randomUUID) {
-    return crypto.randomUUID();
-  }
-  return `seed-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
-}
+import { createSeed } from "@/lib/seed-db";
 
 export default function SeedPage() {
   const [step, setStep] = useState<1 | 2 | 3 | "completed" | "share">(1);
@@ -22,6 +15,8 @@ export default function SeedPage() {
   const [message, setMessage] = useState("");
   const [mood, setMood] = useState<Mood | null>(null);
   const [seedId, setSeedId] = useState<string | null>(null);
+  const [shareError, setShareError] = useState<string | null>(null);
+  const [isSharing, setIsSharing] = useState(false);
 
   const handleStep1Next = () => setStep(2);
   const handleStep2Back = () => setStep(1);
@@ -31,12 +26,19 @@ export default function SeedPage() {
     if (!dayType || !mood) return;
     setStep("completed");
   };
-  const handleShare = () => {
-    if (!dayType || !mood) return;
-    const id = generateSeedId();
-    setSeed(id, { dayType, message, mood });
-    setSeedId(id);
-    setStep("share");
+  const handleShare = async () => {
+    if (!dayType || !mood || isSharing) return;
+    setShareError(null);
+    setIsSharing(true);
+    try {
+      const { id } = await createSeed({ dayType, message, mood });
+      setSeedId(id);
+      setStep("share");
+    } catch (e) {
+      setShareError(e instanceof Error ? e.message : "저장에 실패했어요. 다시 시도해 주세요.");
+    } finally {
+      setIsSharing(false);
+    }
   };
 
   return (
@@ -66,7 +68,14 @@ export default function SeedPage() {
               onBack={handleStep3Back}
             />
           )}
-          {step === "completed" && <SeedCompleted onShare={handleShare} />}
+          {step === "completed" && (
+            <>
+              <SeedCompleted onShare={handleShare} disabled={isSharing} />
+              {shareError && (
+                <p className="mt-4 text-center text-sm text-red-500">{shareError}</p>
+              )}
+            </>
+          )}
           {step === "share" && seedId && (
             <SeedShareLink seedId={seedId} />
           )}
